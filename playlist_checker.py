@@ -29,7 +29,7 @@ def playlist_songs(api, playlists, song_name):
       songs_checked_in_pl = len(tracks)
       progress = songs_checked/song_total
       bar = get_bar(progress, bar_length)
-      print_prog(f'Searching playlist {i+1}/{len(playlists)}: {playlist["name"]}', bar, song_total, songs_checked)
+      print_prog(f'\rSearching playlist {i+1}/{len(playlists)}: {playlist["name"]}', bar, song_total, songs_checked)
 
       if results['next'] == None:
         break
