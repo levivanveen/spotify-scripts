@@ -43,6 +43,8 @@ htmlcov/
 .coverage
 .coverage.*
 .cache*
+.lfm-session_key
+.spotify-cache*
 nosetests.xml
 coverage.xml
 *.cover
