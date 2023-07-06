@@ -77,6 +77,21 @@ class SpotifyApi:
       self.spotify_username = username
     return valid
      
+  def sign_in(self):
+    spotify_sign_in = False
+    lastfm_sign_in = False
+    while True:
+      if not spotify_sign_in: spotify_sign_in = self.spotify_sign_in()
+      if not lastfm_sign_in: lastfm_sign_in = self.lastfm_sign_in()
+      if spotify_sign_in and lastfm_sign_in: break
+      else:
+        if not spotify_sign_in:
+          print("Failed to sign in to Spotify. Retrying...")
+        if not lastfm_sign_in:
+          print("Failed to sign in to Last.fm. Retrying...")
+        print()
+    return self
+     
 
   def spotify_sign_in(self):
     print()

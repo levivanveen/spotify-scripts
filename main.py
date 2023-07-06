@@ -7,7 +7,7 @@ from spotify_scripts.user_info import UserInfo
 def main():
 
   api = SpotifyApi()
-  sign_in(api)
+  api.sign_in()
   
   db = load_db()
   user_id = db.get_user_id(api.get_sp_id())
@@ -42,22 +42,11 @@ def main():
 
 def load_db():
   db = Db()
-  db.connect()
+  try:
+    db.connect()
+  except ValueError:
+    exit(1)
   return db
-
-def sign_in(api):
-  spotify_sign_in = False
-  lastfm_sign_in = False
-  while True:
-    if not spotify_sign_in: spotify_sign_in = api.spotify_sign_in()
-    if not lastfm_sign_in: lastfm_sign_in = api.lastfm_sign_in()
-    if spotify_sign_in and lastfm_sign_in: break
-    else:
-      if not spotify_sign_in:
-        print("Failed to sign in to Spotify. Retrying...")
-      if not lastfm_sign_in:
-        print("Failed to sign in to Last.fm. Retrying...")
-      print()
 
 if __name__ == '__main__':
   main()

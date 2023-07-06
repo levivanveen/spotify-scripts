@@ -29,7 +29,15 @@ class Db:
   def commit(self):
     self.conn.commit()
 
-  def execute(self, query, values=None):
+  def exec(self, query, values=None):
+    try:
+      self.cur.execute(query, values)
+    except IntegrityError as e:
+      self.conn.rollback()
+      return False
+    return True
+
+  def exec_with_return(self, query, values=None):
     try:
       self.cur.execute(query, values)
     except IntegrityError as e:
@@ -42,19 +50,19 @@ class Db:
     self.commit()
 
   def get_user_id(self, spotify_id):
-    return self.execute("SELECT id FROM account WHERE spotify_id = %s", (spotify_id,))[0][0]
+    return self.exec_with_return("SELECT id FROM account WHERE spotify_id = %s", (spotify_id,))[0][0]
 
   def add_playlists(self, p, sp_id):
     count = 0
     for i, playlist in enumerate(p):
-      success = self.execute("INSERT INTO playlist (name, id, user_id, track_count) VALUES (%s, %s, %s, %s)",
+      success = self.exec("INSERT INTO playlist (name, id, user_id, track_count) VALUES (%s, %s, %s, %s)",
                          (playlist['name'], playlist['id'], sp_id, playlist['tracks']['total']))
       if not success:
         self.update_track_count(playlist)
         continue
       self.commit()
       count += 1
-      print(f"Playlist {i+1} inserted successfully")
+      print(f"Playlist {playlist['name']} inserted successfully")
     return count
 
   def update_track_count(self, p):
@@ -87,7 +95,7 @@ class Db:
         album_name = track['track']['album']['name']
         # Add song to songs table
         try:
-          self.execute("INSERT INTO songs (id, name, artist, album) VALUES (%s, %s, %s, %s)",
+          self.exec("INSERT INTO songs (id, name, artist, album) VALUES (%s, %s, %s, %s)",
                            (track_id, track_name, artist_name, album_name))
           self.commit()
           count += 1
@@ -96,7 +104,7 @@ class Db:
 
         # Add song to playlist_songs table
         try:
-          self.execute("INSERT INTO playlist_songs (playlist_id, id) VALUES (%s, %s)",
+          self.exec("INSERT INTO playlist_songs (playlist_id, id) VALUES (%s, %s)",
                            (p_id, track_id))
           self.commit()
           p_count += 1
@@ -105,7 +113,7 @@ class Db:
     return count, p_count
 
   def add_user(self, sp_id, sp_name, lfm_username):
-    success = self.execute("INSERT INTO account (spotify_id, spotify_name, lastfm_username) VALUES (%s, %s, %s)",
+    success = self.exec("INSERT INTO account (spotify_id, spotify_name, lastfm_username) VALUES (%s, %s, %s)",
                        (sp_id, sp_name, lfm_username))
     if not success:
       return False
@@ -115,13 +123,13 @@ class Db:
 
   def get_playlists(self, sp_id, name=''):
     if name:
-      playlists = self.execute("SELECT id, name, track_count FROM playlist WHERE user_id = %s AND LOWER(name) LIKE %s", (sp_id, '%' + name.lower() + '%'))
+      playlists = self.exec_with_return("SELECT id, name, track_count FROM playlist WHERE user_id = %s AND LOWER(name) LIKE %s", (sp_id, '%' + name.lower() + '%'))
     else:
-      playlists = self.execute("SELECT id, name, track_count FROM playlist WHERE user_id = %s", (sp_id,))
+      playlists = self.exec_with_return("SELECT id, name, track_count FROM playlist WHERE user_id = %s", (sp_id,))
     return playlists
 
   def get_playlist_songs(self, p_id):
-    songs = self.execute("SELECT songs.id, songs.name FROM songs JOIN playlist_songs ON songs.id = playlist_songs.id WHERE playlist_songs.playlist_id = %s", (p_id,))
+    songs = self.exec_with_return("SELECT songs.id, songs.name FROM songs JOIN playlist_songs ON songs.id = playlist_songs.id WHERE playlist_songs.playlist_id = %s", (p_id,))
     return songs
   
   #def get_tracks 
