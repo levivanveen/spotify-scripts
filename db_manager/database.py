@@ -5,6 +5,12 @@ from psycopg2 import IntegrityError
 HOST = 'localhost'
 DATABASE = 'spotify'
 USER = 'postgres'
+PLAYLIST_ID = 0
+PLAYLIST_NAME = 1
+TRACK_COUNT = 2
+SONG_ID = 0
+SONG_NAME = 1
+SONG_ARTIST = 2
 
 class Db:
   def __init__(self) -> None:
@@ -14,6 +20,12 @@ class Db:
     self.password = None
     self.conn = None
     self.cur = None
+    self.playlist_id_idx = PLAYLIST_ID
+    self.playlist_name_idx = PLAYLIST_NAME
+    self.track_count_idx = TRACK_COUNT
+    self.song_id_idx = SONG_ID
+    self.song_name_idx = SONG_NAME
+    self.song_artist_idx = SONG_ARTIST
 
   def connect(self):
     try:
