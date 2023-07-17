@@ -129,7 +129,7 @@ class Db:
     return playlists
 
   def get_playlist_songs(self, p_id):
-    songs = self.exec_with_return("SELECT songs.id, songs.name FROM songs JOIN playlist_songs ON songs.id = playlist_songs.id WHERE playlist_songs.playlist_id = %s", (p_id,))
+    songs = self.exec_with_return("SELECT songs.id, songs.name, songs.artist FROM songs JOIN playlist_songs ON songs.id = playlist_songs.id WHERE playlist_songs.playlist_id = %s", (p_id,))
     return songs
   
   #def get_tracks 
