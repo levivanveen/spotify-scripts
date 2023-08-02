@@ -102,6 +102,8 @@ class SpotifyApi:
     if sign_in == SIGN_IN_WEB:
       try:
         self.get_creds_web()
+        if self.set_username(self.sp.current_user()['id']) == False:
+          return False
       except ValueError as e:
         print(e)
         return False
@@ -128,9 +130,12 @@ class SpotifyApi:
     return True
   
   def lastfm_sign_in(self):
-    with open(SESSION_KEY_FILE, 'r') as f:
-            _, saved_username = ast.literal_eval(f.read())
-    new_user = input(f"Signing into Last.fm\nEnter your Last.fm username or press enter to use {saved_username}\n:")
+    saved_username = ""
+    if os.path.exists(SESSION_KEY_FILE):
+      with open(SESSION_KEY_FILE, 'r') as f:
+        _, saved_username = ast.literal_eval(f.read())
+    inputString = f" or press enter to use {saved_username}" if saved_username != "" else ""
+    new_user = input(f"Signing into Last.fm\nEnter your Last.fm username {inputString}\n:")
     print()
     try:
       self.get_creds_lfm_web(new_user)
